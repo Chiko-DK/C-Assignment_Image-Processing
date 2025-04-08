@@ -4,33 +4,59 @@
 #include <string>
 #include <fstream>
 #include <queue>
-
-#include "ConnectedComponent.h"
-#include "PGMimageProcessor.h"
-
-// PGMimageProcessor.cpp
-#include "PGMimageProcessor.h"
-#include <fstream>
-#include <iostream>
-#include <queue>
 #include <sstream>
+
+//#include "ConnectedComponent.h"
+#include "PGMimageProcessor.h"
+
 
 // Constructor
 PGMimageProcessor::PGMimageProcessor(const std::string &filename) {
-    std::ifstream file(filename, std::ios::binary);
-    if (!file.is_open()) throw std::runtime_error("Cannot open file");
+    std::ifstream ifs(filename, std::ios::binary);
+    if (!ifs)
+    {
+        std::cerr << "Failed top open file for read: " << filename << std::endl;
+        return;
+    }
+    std::string line;
+    ifs >> line >> std::ws;
+    if (line != "P5")
+    {
+        std::cerr << "Malformed PGM file - magic is: " << line << std::endl;
+        return;
+    }
+    while (getline(ifs, line))
+    {
+        //cout << line << endl;
+        if (line[0] != '#') break;
+    }
+    std::istringstream iss(line);
+    iss >> width >> height;
+    //cout << "width, height = (" << width << "," << height << ")\n";
 
-    std::string magic;
-    file >> magic;
-    if (magic != "P5") throw std::runtime_error("Not a valid P5 PGM file");
-
-    file >> width >> height;
-    int maxVal;
-    file >> maxVal;
-    file.get(); // consume the newline after maxVal
+    if (!iss)
+    {
+        std::cerr << "Header not correct - unexpected image sizes found: " << line << std::endl;
+        return;
+    }
+    int maxChan = 0;
+    ifs >> maxChan >> std::ws;
+    if (maxChan != 255)
+    {
+        std::cerr << "Max grey level incorect - found: " << maxChan << std::endl;
+    }
+    // start of binary block
 
     image.resize(width * height);
-    file.read(reinterpret_cast<char *>(image.data()), image.size());
+    ifs.read(reinterpret_cast<char*>(image.data()), image.size());
+
+    if (!ifs)
+    {
+        std::cerr << "Failed to read binary block - read\n";
+    }
+
+    ifs.close();
+
 }
 
 // Destructor
@@ -59,11 +85,11 @@ PGMimageProcessor &PGMimageProcessor::operator=(const PGMimageProcessor &other) 
 }
 
 // Move Constructor
-PGMimageProcessor::PGMimageProcessor(PGMimageProcessor &&other) noexcept
+PGMimageProcessor::PGMimageProcessor(PGMimageProcessor &&other)
     : width(other.width), height(other.height), image(std::move(other.image)), components(std::move(other.components)) {}
 
 // Move Assignment Operator
-PGMimageProcessor &PGMimageProcessor::operator=(PGMimageProcessor &&other) noexcept {
+PGMimageProcessor &PGMimageProcessor::operator=(PGMimageProcessor &&other) {
     if (this != &other) {
         width = other.width;
         height = other.height;
@@ -118,7 +144,7 @@ int PGMimageProcessor::extractComponents(unsigned char threshold, int minValidSi
 }
 
 int PGMimageProcessor::filterComponentsBySize(int minSize, int maxSize) {
-    std::vector<std::unique_ptr<ConnectedComponent>> filtered;
+    std::vector<std::shared_ptr<ConnectedComponent>> filtered;
     for (auto &comp : components) {
         int size = comp->getSize();
         if (size >= minSize && size <= maxSize) {
@@ -146,9 +172,6 @@ bool PGMimageProcessor::writeComponents(const std::string &outFileName) {
     return true;
 }
 
-int PGMimageProcessor::getComponentCount() const {
-    return components.size();
-}
 
 int PGMimageProcessor::getLargestSize() const {
     int maxSize = 0;

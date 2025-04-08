@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <fstream>
 #include <queue>
 
 #include "ConnectedComponent.h"
@@ -14,13 +13,13 @@ class PGMimageProcessor {
 private:
     int width, height;
     std::vector<unsigned char> image;
-    std::vector<std::unique_ptr<ConnectedComponent> > components;
+    std::vector<std::shared_ptr<ConnectedComponent> > components;
 
 public:
     // Constructor and Destructor
     PGMimageProcessor();
     PGMimageProcessor(const std::string &filename);
-    ~PGMimageProcessor() = default;
+    ~PGMimageProcessor();
 
 
     PGMimageProcessor(const PGMimageProcessor &other); // Copy constructor
@@ -36,6 +35,8 @@ public:
     int getLargestSize() const;
     int getSmallestSize() const;
     void printComponentData(const ConnectedComponent &comp) const;
+
+    const std::vector<std::shared_ptr<ConnectedComponent>>& getComponents() const { return components; }
 };
 
 

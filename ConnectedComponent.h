@@ -2,7 +2,6 @@
 #define CONNECTED_COMPONENT_H
 
 #include <vector>
-#include <utility>
 
 
 class ConnectedComponent {
@@ -12,12 +11,17 @@ class ConnectedComponent {
         std::vector<std::pair<int, int>> pixels;
     
     public:
-        ConnectedComponent(int componentId) : id(componentId), pixelCount(0) {}
+        ConnectedComponent();
+        ConnectedComponent(int componentId);
+        ~ConnectedComponent();
+
+        ConnectedComponent(const ConnectedComponent& other); // Copy constructor
+        ConnectedComponent& operator=(const ConnectedComponent& other); // Copy assignment operator
+
+        ConnectedComponent(ConnectedComponent&& other); // Move constructor
+        ConnectedComponent& operator=(ConnectedComponent&& other); // Move assignment operator
     
-        void addPixel(int x, int y) {
-            pixels.emplace_back(x, y);
-            ++pixelCount;
-        }
+        void addPixel(int x, int y);
     
         int getSize() const { return pixelCount; }
         int getId() const { return id; }

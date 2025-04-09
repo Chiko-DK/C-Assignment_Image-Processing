@@ -2,14 +2,12 @@
 #include <vector>
 #include <utility>
 
-// ConnectedComponent.cpp
 #include "ConnectedComponent.h"
 
-// Default constructor
+// Constructor
 ConnectedComponent::ConnectedComponent()
     : id(-1), pixelCount(0) {}
 
-// Parameterized constructor
 ConnectedComponent::ConnectedComponent(int id)
     : id(id), pixelCount(0) {}
 
@@ -51,7 +49,7 @@ ConnectedComponent& ConnectedComponent::operator=(ConnectedComponent&& other) {
 }
 
 
-// Modifiers
+// Add a pixel to the component
 void ConnectedComponent::addPixel(int x, int y) {
     pixels.emplace_back(x, y);
     ++pixelCount;

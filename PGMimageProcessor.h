@@ -28,6 +28,9 @@ public:
     PGMimageProcessor(PGMimageProcessor &&other); // Move constructor
     PGMimageProcessor &operator=(PGMimageProcessor &&other); // Move assignment operator
 
+    const std::vector<std::shared_ptr<ConnectedComponent>>& getComponents() const { return components; }
+
+    // Core methods
     int extractComponents(unsigned char threshold, int minValidSize);
     int filterComponentsBySize(int minSize, int maxSize);
     bool writeComponents(const std::string &outFileName);
@@ -36,7 +39,6 @@ public:
     int getSmallestSize() const;
     void printComponentData(const ConnectedComponent &comp) const;
 
-    const std::vector<std::shared_ptr<ConnectedComponent>>& getComponents() const { return components; }
 };
 
 

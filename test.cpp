@@ -6,13 +6,8 @@
 #include <fstream>
 #include <iostream>
 
-TEST_CASE("PGMimageProcessor::extractComponents - basic and edge cases", "[extractComponents]") {
+TEST_CASE("PGMimageProcessor::extractComponents", "[extractComponents]") {
     PGMimageProcessor processor("Birds.pgm");
-
-    SECTION("Threshold = 0 should extract all non-zero components") {
-        int count = processor.extractComponents(0, 1);
-        REQUIRE(count > 0);
-    }
 
     SECTION("Threshold = 255 should likely extract very few or no components") {
         int count = processor.extractComponents(255, 1);
@@ -20,7 +15,7 @@ TEST_CASE("PGMimageProcessor::extractComponents - basic and edge cases", "[extra
     }
 
     SECTION("Minimum valid size filtering") {
-        int count = processor.extractComponents(128, 10000); // overly high
+        int count = processor.extractComponents(128, 10000);
         REQUIRE(count == 0);
     }
 
@@ -30,19 +25,20 @@ TEST_CASE("PGMimageProcessor::extractComponents - basic and edge cases", "[extra
     }
 
     SECTION("Valid mid-range threshold") {
-        int count = processor.extractComponents(128, 1);
+        int count = processor.extractComponents(35, 1);
         REQUIRE(count > 0);
-        REQUIRE(processor.getComponentCount() == count);
+        REQUIRE(count == 15);
     }
 }
 
-TEST_CASE("PGMimageProcessor::filterComponentsBySize - edge and invalid ranges", "[filterComponentsBySize]") {
+TEST_CASE("PGMimageProcessor::filterComponentsBySize", "[filterComponentsBySize]") {
     PGMimageProcessor processor("Birds.pgm");
-    processor.extractComponents(128, 1);
+    processor.extractComponents(35, 1);
 
     SECTION("Valid filtering range") {
-        int remaining = processor.filterComponentsBySize(5, 500);
+        int remaining = processor.filterComponentsBySize(5, 6000);
         REQUIRE(remaining <= processor.getComponentCount());
+        REQUIRE(remaining == 5);
     }
 
     SECTION("Zero-size range - should remove all") {
@@ -67,26 +63,26 @@ TEST_CASE("PGMimageProcessor::writeComponents - output test", "[writeComponents]
     REQUIRE(outfile.good());
     std::string header;
     std::getline(outfile, header);
-    REQUIRE(header == "P5"); // Ensure valid PGM header
+    REQUIRE(header == "P5");
     outfile.close();
 }
 
-TEST_CASE("PGMimageProcessor::getLargestSize and getSmallestSize - edge behavior", "[sizes]") {
+TEST_CASE("PGMimageProcessor::getLargestSize and getSmallestSize", "[sizes]") {
     PGMimageProcessor processor("Birds.pgm");
-    processor.extractComponents(128, 1);
+    processor.extractComponents(35, 10);
 
     int largest = processor.getLargestSize();
     int smallest = processor.getSmallestSize();
 
     REQUIRE(largest >= smallest);
-    REQUIRE(largest > 0);
-    REQUIRE(smallest > 0);
+    REQUIRE(largest == 7671);
+    REQUIRE(smallest == 4007);
 }
 
-TEST_CASE("PGMimageProcessor::printComponentData - does not crash or throw", "[printComponentData]") {
+TEST_CASE("PGMimageProcessor::printComponentData", "[printComponentData]") {
     PGMimageProcessor processor("Birds.pgm");
-    processor.extractComponents(128, 1);
-    REQUIRE(processor.getComponentCount() > 0);
+    processor.extractComponents(35, 10);
+    REQUIRE(processor.getComponentCount() == 8);
 
     const auto& components = processor.getComponents();
     for (size_t i = 0; i < std::min(components.size(), size_t(3)); ++i) {

@@ -99,6 +99,7 @@ PGMimageProcessor &PGMimageProcessor::operator=(PGMimageProcessor &&other) {
     return *this;
 }
 
+// Core Methods
 int PGMimageProcessor::extractComponents(unsigned char threshold, int minValidSize) {
     std::vector<unsigned char> binImage = image;
     int id = 0;
@@ -194,7 +195,7 @@ int PGMimageProcessor::getSmallestSize() const {
 
 void PGMimageProcessor::printComponentData(const ConnectedComponent &comp) const {
     std::cout << "Component ID: " << comp.getId()
-              << ", Pixel Count: " << comp.getSize() << "\n";
+              << "; Pixel Count: " << comp.getSize() << "\n";
 }
 
 
